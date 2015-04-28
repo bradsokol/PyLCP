@@ -33,11 +33,11 @@ Developer Notes
 To get started:
 
     (create a virtual environment)
-    pip install -r requirements-dev.txt
+    pip install -e .
 
 To run tests:
 
-    nosetests
+    python setup.py test
 
 To check code style:
 
@@ -46,5 +46,6 @@ To check code style:
 To install a local copy of the code in to a virtual environment (for testing
 changes to PyLCP in your LCP App project):
 
-    python setup.py develop
+    (activate your app's virtual environment)
+    pip install -e /path/to/pylcp/source
 

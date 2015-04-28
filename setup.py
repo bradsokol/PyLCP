@@ -3,18 +3,33 @@
 # See http://bugs.python.org/issue15881#msg170215
 import multiprocessing        # NOQA
 
+from setuptools.command.test import test as TestCommand
 import distutils.command.clean
 import os
-import pkg_resources
 import setuptools
 import subprocess
 
 
-class Clean(distutils.command.clean.clean):
+class CleanCommand(distutils.command.clean.clean):
     def run(self):
         subprocess.call('find . -name *.pyc -delete'.split(' '))
-        subprocess.call('rm -rf *.egg/ test_results/ .coverage .noseids'.split(' '))
+        subprocess.call('find . -name *.egg -prune -exec rm -rf {} ;'.split(' '))
+        subprocess.call('rm -rf build/ dist/ PyLCP.egg-info/ .coverage .noseids'.split(' '))
         distutils.command.clean.clean.run(self)
+
+
+class NoseTestCommand(TestCommand):
+    # Cleaner way to run nose tests using 'python setup.py test'
+    # See: http://fgimian.github.io/blog/2014/04/27/running-nose-tests-with-plugins-using-the-python-setuptools-test-command/  # NOQA
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import nose
+        nose.run_exit(argv=['nosetests'])
 
 
 def read_file(file_name):
@@ -26,18 +41,6 @@ def read_first_line(file_name):
     """Read the first line from the specified file."""
     with open(os.path.join(os.path.dirname(__file__), file_name)) as f:
         return f.readline().strip()
-
-
-def read_requirements(file_path):
-    return [
-        i.strip()
-        for i in pkg_resources.resource_string(__name__, file_path).split()
-        if i.strip()[0:1] != '#' and i.strip()[0:2] != '--' and len(i.strip()) > 0
-    ]
-
-
-REQUIREMENTS = read_requirements('requirements.txt')
-TEST_REQUIREMENTS = read_requirements('requirements-dev.txt')
 
 
 setuptools.setup(name='PyLCP',
@@ -64,13 +67,21 @@ setuptools.setup(name='PyLCP',
                  packages=setuptools.find_packages(exclude=['tests']),
                  include_package_data=True,
                  zip_safe=False,
-                 install_requires=REQUIREMENTS,
+                 install_requires=[
+                     'requests',
+                     'simplejson',
+                 ],
                  entry_points="""
                  # -*- Entry points: -*-
                  """,
-                 test_suite='nose.collector',
-                 tests_require=TEST_REQUIREMENTS,
+                 tests_require=[
+                     'coverage',
+                     'flake8',
+                     'mock',
+                     'nose',
+                 ],
                  cmdclass={
-                     'clean': Clean
+                     'clean': CleanCommand,
+                     'test': NoseTestCommand,
                  },
                  )
