@@ -35,13 +35,9 @@ To get started:
     (create a virtual environment)
     pip install -e .
 
-To run tests:
+To run check code style and run tests:
 
     python setup.py test
-
-To check code style:
-
-    flake8
 
 To install a local copy of the code in to a virtual environment (for testing
 changes to PyLCP in your LCP App project):
