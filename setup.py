@@ -7,7 +7,6 @@ from setuptools.command.test import test as TestCommand
 import distutils.command.clean
 import os
 import setuptools
-import sys
 import subprocess
 
 
@@ -29,10 +28,6 @@ class NoseTestCommand(TestCommand):
         self.test_suite = True
 
     def run_tests(self):
-        return_code = subprocess.call('flake8')
-        if return_code > 0:
-            sys.exit(return_code)
-
         import nose
         nose.run_exit(argv=['nosetests'])
 

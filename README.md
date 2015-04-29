@@ -35,7 +35,7 @@ To get started:
     (create a virtual environment)
     pip install -e .
 
-To run check code style and run tests:
+To run tests:
 
     python setup.py test
 
